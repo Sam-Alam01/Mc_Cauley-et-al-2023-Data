@@ -1,0 +1,54 @@
+# Download the Library V4 Data from the McCauley dataset into the R console
+dataRDS <- readRDS("V4 Library.rdata) #Assigned the readRDS function to dataRDS
+ps <- dataRDS
+tax <-as(taxtable(ps),"matrix") #Assigned the taxonomy table tax
+tax_cols <- colnames(tax)
+tax<-as.data.frame(tax) 
+tax$taxonomy<-do.call(paste, c(tax[tax_cols], sep=";"))
+for(co in tax_cols) tax[co]<-NULL
+> write.table(tax, "tax.txt", quote=FALSE, col.names=FALSE, sep="\t")
+library(biomformat);packageVersion("biomformat")
+ otu<-t(as(otu_table(ps),"matrix"))
+otu_biom<-make_biom(data=otu)
+
+#Open Terminal and begin opening the files from the R console
+qiime tools import \
+--input-path otu_biom.biom \
+--type 'FeatureTable[Frequency]' \
+--input-format BIOMV100Format \
+--output-path feature-table.qza
+
+#Import the sequence biom table
+qiime tools import \
+--input-path  seqtab-biom-table.biom \
+--type 'FeatureTable[Frequency]' \
+--input-format BIOMV210Format \
+--output-path feature-table2.qza
+
+#Import the taxonomy format
+qiime tools import \
+--type 'FeatureData[Taxonomy]' \
+--input-format HeaderlessTSVTaxonomyFormat \
+--input-path tax.txt \
+--output-path taxonomy.qza
+
+#Import the visualization of the feature table to the Qiime2 viewer
+qiime feature-table summarize \ 
+  --i-table feature-table.qza \
+  --o-visualization feature-table-summary.qzv  
+
+#Put all relevant files into a folder for easy access
+(qiime2-amplicon-2023.9) samalam@Sams-MacBook-Air-15 downloads % mv tax.txt mc_cauley 
+(qiime2-amplicon-2023.9) samalam@Sams-MacBook-Air-15 downloads % mv sample-metadata.txt mc_cauley 
+(qiime2-amplicon-2023.9) samalam@Sams-MacBook-Air-15 downloads % mv seqtab-biom-table.biom mc_cauley
+(qiime2-amplicon-2023.9) samalam@Sams-MacBook-Air-15 downloads % mv seqtab-biom-table.txt mc_cauley
+(qiime2-amplicon-2023.9) samalam@Sams-MacBook-Air-15 downloads % mv tax_table.csv mc_cauley 
+(qiime2-amplicon-2023.9) samalam@Sams-MacBook-Air-15 downloads % mv tax_table.tsv mc_cauley
+(qiime2-amplicon-2023.9) samalam@Sams-MacBook-Air-15 downloads % mv feature-frequencies.jpg mc_cauley
+(qiime2-amplicon-2023.9) samalam@Sams-MacBook-Air-15 downloads % cd mc_cauley 
+(qiime2-amplicon-2023.9) samalam@Sams-MacBook-Air-15 mc_cauley % ls
+V4 Library.rdata		feature-table2.qza		tax_table.csv
+V4_p Library (1).rdata		sample-metadata.txt		tax_table.tsv
+feature-frequencies.jpg		seqtab-biom-table.biom		taxonomy (1).qza
+feature-table-summary.qzv	seqtab-biom-table.txt		taxonomy.qza
+feature-table.qza		tax.txt
